@@ -6,7 +6,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:2.2-stretch AS build
 WORKDIR /src
 COPY ["TelegramBot.Server/TelegramBot.Server.csproj", "TelegramBot.Server/"]
-RUN dotnet restore "EmptyTelegramBot.Core/EmptyTelegramBot.Core.csproj"
+RUN dotnet restore "TelegramBot.Server/TelegramBot.Server.csproj"
 COPY . .
 WORKDIR "/src/TelegramBot.Server"
 RUN dotnet build "TelegramBot.Server.csproj" -c Release -o /app
