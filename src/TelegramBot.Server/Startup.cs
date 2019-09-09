@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 using TelegramBot.Common;
 using TelegramBot.Common.Swagger;
+using TelegramBot.Domain.Models;
 
 namespace TelegramBot.Server
 {
@@ -21,12 +22,20 @@ namespace TelegramBot.Server
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc();
+            services.AddOptions();
+
+            services.Configure<Socks5ProxyConfiguration>(
+                _configuration.GetSection("Socks5ProxyConfiguration"));
 
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "TelegramBot.Server", Version = "v1" });
-                c.DocumentFilter<EnumDescriptionFilter>();
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "TelegramBot.Server", Version = "v1"
+                });
 
+                c.DocumentFilter<EnumDescriptionFilter>();
             });
         }
 
@@ -41,12 +50,7 @@ namespace TelegramBot.Server
 
             app.UseStaticFiles();
             app.UseSwagger(_configuration);
-
-            // todo: need to uncomment if we will use ef core
-            //using (var scope = app.ApplicationServices.CreateScope())
-            //{
-            //    scope.ServiceProvider.GetRequiredService<DataContext>().InitDatabase();
-            //}
+            app.UseMvc();
 
             if (env.IsDevelopment())
             {
