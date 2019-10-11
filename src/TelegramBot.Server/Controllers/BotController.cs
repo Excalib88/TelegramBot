@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using System.Threading.Tasks;
 using TelegramBot.Common;
+using TelegramBot.Domain.Abstractions;
 using TelegramBot.Domain.Models;
 
 namespace TelegramBot.Server.Controllers
@@ -11,10 +13,18 @@ namespace TelegramBot.Server.Controllers
     public class BotController : ControllerBase
     {
         private Socks5ProxyConfiguration _proxyConfiguration;
-
-        public BotController(IOptions<Socks5ProxyConfiguration> options)
+        private readonly IBotService _botService;
+        
+        public BotController(IOptions<Socks5ProxyConfiguration> options, IBotService botService)
         {
             _proxyConfiguration = options.Value;
+            _botService = botService;
+        }
+
+        [HttpGet("start")]
+        public void Init()
+        {
+            //return _botService.GetBotClientAsync().Wait();
         }
 
         [HttpGet("getproxy")]

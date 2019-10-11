@@ -1,7 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Args;
 using TelegramBot.Domain.Abstractions;
@@ -11,29 +14,41 @@ namespace TelegramBot.Domain.Services
 {
     public class BotService : IBotService
     {
+        private Socks5ProxyConfiguration _socks5Proxy;
+
         private BotClient _botClient;
         private readonly ILogger _logger;
 
-        public BotService(ILoggerFactory loggerFactory)
+        public BotService(IOptions<Socks5ProxyConfiguration> options, ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger<BotService>();
+            _socks5Proxy = new Socks5ProxyConfiguration { Host = "45.77.9.199", Port = 1080 };//options.Value;
         }
 
         public BotClient Configure()
         {
             _botClient = BotClient
                     .Create()
-                    .SetSecretKeyWithProxy("secretKey", new Socks5ProxyConfiguration())
+                    .SetSecretKeyWithProxy("983922268:AAGxXiplHabEGFUYv92pKe9VjogbPW2793I", _socks5Proxy)
+                    .SetOnMessageCallback()
                     .Build();
 
-            _botClient.OnMessage += _botClient_OnMessage;
-            
             return _botClient;
         }
 
-        private void _botClient_OnMessage(object sender, MessageEventArgs e)
+        public async Task<BotClient> GetBotClientAsync()
         {
-            _logger.LogInformation(e.Message.MessageId.ToString());
+            if (_botClient != null)
+            {
+                _logger.LogInformation("Bot client was configured");
+                return _botClient;
+
+            }
+            // Configure BotClient
+            this.Configure();
+
+            await _botClient.GetUpdatesAsync();
+            return _botClient;
         }
     }
 }

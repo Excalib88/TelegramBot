@@ -1,20 +1,20 @@
 ﻿using MihaZupan;
+using SharpCollections.Generic;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
+using System.Threading.Tasks;
+using Telegram.Bot.Types;
 using TelegramBot.Domain.Models;
 
 namespace TelegramBot.Domain.FluentBuilders
 {
     public class BotClientBuilder
     {
-        private BotClient _botClient;
+        private BotClient botClient;
 
         public BotClientBuilder SetSecretKey(string secretKey)
         {
-            _botClient = new BotClient(secretKey);
+            botClient = new BotClient(secretKey);
+            
             return this;
         }
 
@@ -23,25 +23,31 @@ namespace TelegramBot.Domain.FluentBuilders
         {
             var proxy = new HttpToSocks5Proxy(
                 proxyConfiguration.Host, 
-                proxyConfiguration.Port, 
-                proxyConfiguration.Username, 
-                proxyConfiguration.Password);
+                proxyConfiguration.Port);
 
-            _botClient = new BotClient(secretKey, proxy);
+            botClient = new BotClient(secretKey, proxy);
 
+            return this;
+        }
+
+        public BotClientBuilder SetOnMessageCallback()
+        {
+            //- todo: need refactoring eventHandlers
             return this;
         }
 
         public BotClientBuilder Build()
         {
-            _botClient.StartReceiving();
+            //botClient.EventHandlers.Add(new OnMessage());
+            //botClient.OnMessage += BotClient_OnMessage;
+            //botClient.StartReceiving();
 
             return this;
         }
 
         public static implicit operator BotClient(BotClientBuilder botClientBuilder)
         {
-            return botClientBuilder._botClient;
+            return botClientBuilder.botClient;
         }
     }
 }

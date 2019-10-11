@@ -2,9 +2,9 @@
 using TelegramBot.Domain.FluentBuilders;
 using Telegram.Bot;
 using System.Collections.Generic;
-using TelegramBot.Domain.Abstractions.Handlers;
+using TelegramBot.Event.Abstractions.Handlers;
 
-namespace TelegramBot.Domain.Models
+namespace TelegramBot.Abstractions
 {
     public class BotClient: TelegramBotClient
     {

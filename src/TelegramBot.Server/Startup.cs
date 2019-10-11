@@ -5,8 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using System;
 using TelegramBot.Common;
 using TelegramBot.Common.Swagger;
+using TelegramBot.Domain.Abstractions;
 using TelegramBot.Domain.Models;
 
 namespace TelegramBot.Server
@@ -24,7 +26,8 @@ namespace TelegramBot.Server
         {
             services.AddMvc();
             services.AddOptions();
-
+            services.AddCallbackServices();
+            
             services.Configure<Socks5ProxyConfiguration>(
                 _configuration.GetSection("Socks5ProxyConfiguration"));
 
@@ -40,13 +43,17 @@ namespace TelegramBot.Server
         }
 
         [UsedImplicitly]
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILogger<Startup> logger)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, 
+            ILogger<Startup> logger, IServiceProvider serviceProvider)
         {
             app.Use(async (context, func) =>
             {
                 logger.LogInformation("Http Request {HttpContext}");
                 await func();
             });
+
+            var botService = serviceProvider.GetService<IBotService>();
+            botService.GetBotClientAsync().Wait();
 
             app.UseStaticFiles();
             app.UseSwagger(_configuration);
